@@ -1,11 +1,11 @@
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <iostream>
 #include <complex>
 #include <cmath>
 #include <string>
 
-const int scr_width = 1280;
-const int scr_height = 720;
+const int scr_width = 600;
+const int scr_height = 400;
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -19,14 +19,49 @@ void shutdown(std::string str)
 	window_is_open = false;
 }
 
+/* Coloring functinos. */
+uint8_t color_r(uint8_t x)
+{
+    return 45 * log(x - 20) + 5;
+}
+
+uint8_t color_g(uint8_t x)
+{
+    return 45 * log(x - 40) + 10;
+    //return 255 / exp(pow(x - 255, 2) / 9000);
+}
+
+uint8_t color_b(uint8_t x)
+{
+    return 45 * log(x);
+}
 
 /* Function sets the color to draw. */
 void set_color(uint8_t iterations, double scale_x, double scale_y)
 {
 	const uint8_t alpha = 0;
-	uint8_t red = uint8_t(255 - (3 * abs(iterations))^20 );
-	uint8_t green = uint8_t(255 - (3 * abs(iterations))^20 );
-	uint8_t blue = (uint8_t) iterations;
+	//uint8_t red = uint8_t(255 - (3 * abs(iterations))^20 );
+	//uint8_t green = uint8_t(255 - (3 * abs(iterations))^20 );
+    
+    uint8_t red = 0;
+    uint8_t green = 0;
+    uint8_t blue = 0;
+
+    /* If it converges. */
+    if (iterations == 255)
+    
+    {
+        red = 0;
+        green = 0;
+        blue = 0;
+    }
+    else
+    {
+        red = color_r(iterations);
+        green = color_g(iterations);
+        blue = color_b(iterations);
+    }
+
 
 	SDL_SetRenderDrawColor(renderer, red, green, blue, alpha);
 }
@@ -55,7 +90,7 @@ void draw_mandelbrot(complex<double> upper_left, complex<double> lower_right)
 			complex<double> z(0.0);
 
 			/* DEBUGING! */
-			std::cout << "C real: " << c.real() << " C imag: " << c.imag() << std::endl;
+			//std::cout << "C real: " << c.real() << " C imag: " << c.imag() << std::endl;
 
 			uint8_t iterations = 0;
 			for (iterations = 0; iterations < 255; iterations++)
@@ -64,11 +99,11 @@ void draw_mandelbrot(complex<double> upper_left, complex<double> lower_right)
 				if (abs(z) > 2.0) { break; }
 			}
 
-			std::cout << "Drawing... X: " << px_x << ", Y: " << px_y << ", ";
+			//std::cout << "Drawing... X: " << px_x << ", Y: " << px_y << ", ";
 
-			std::cout << "Iterations: " << int(iterations) << std::endl;
+			//std::cout << "Iterations: " << int(iterations) << std::endl;
 			set_color(iterations, scale_x, scale_y);
-			std::cout << "ABS(z) = " << abs(z) << std::endl;
+			//std::cout << "ABS(z) = " << abs(z) << std::endl;
 			SDL_RenderDrawPoint(renderer, px_x, px_y);
 			SDL_RenderPresent(renderer);
 			
@@ -107,8 +142,6 @@ int main (int argc, char *argv[])
 	{
 		/* Draw mandelbrot to the renderer and renderer to the screen. */
 		using std::complex;
-		//complex<double> ul = std::complex<double>(-1.5021, 0.0001);
-		//complex<double> lr = std::complex<double>(-1.5019, -0.0001);
 		complex<double> ul = std::complex<double>(-2, 1);
 		complex<double> lr = std::complex<double>(1, -1);
 		draw_mandelbrot(ul, lr);
