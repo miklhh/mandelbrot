@@ -9,8 +9,8 @@
 #include "types.h"
 #include "supersampling.h"
 
-extern const int scr_width = 1600;
-extern const int scr_height = 900;
+extern const int scr_width = 800;
+extern const int scr_height = 600;
 uint32_t max_iterations = 40000;
 
 static SDL_Window* window = NULL;

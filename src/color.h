@@ -7,8 +7,8 @@
 
 #include "types.h"
 
-/* Set color to a renderer based on how many iterations have been calculated 
- * and value on the last Z. */
+/* Get color based on how many iterations have been calculated and value on the 
+ * last Z. */
 color_t get_color(
     uint32_t iterations,
     std::complex<double> zn);
