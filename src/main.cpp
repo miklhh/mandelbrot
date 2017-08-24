@@ -13,9 +13,9 @@
 #include "render.h"
 
 
-extern const int scr_width = 600;
-extern const int scr_height = 400;
-uint32_t max_iterations = 40000;
+extern const int scr_width = 1000;
+extern const int scr_height = 800;
+uint32_t max_iterations = 4000;
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -36,7 +36,7 @@ void shutdown(std::string str)
 void draw_mandelbrot_iterate(int y_start, int y_end, scale_t scale, offset_t offset)
 {
     /* Iterate over each pixel on the screen and draw. */
-    for (int px_y = y_start; px_y <= y_end; px_y++)
+    for (int px_y = y_start; px_y < y_end; px_y++)
     {
         for (int px_x = 0; px_x < scr_width; px_x++)
         {
@@ -111,7 +111,7 @@ void draw_mandelbrot(complex<double> upper_left, complex<double> lower_right, ui
             }
         }
         SDL_RenderPresent(renderer);
-        SDL_Delay(10);
+        SDL_Delay(1);
     }
 
 
@@ -150,8 +150,10 @@ int main (int argc, char *argv[])
 
     /* Draw mandelbrot to the renderer and renderer to the screen. */
     using std::complex;
-    complex<double> ul = std::complex<double>(-0.747, 0.120);
-    complex<double> lr = std::complex<double>(-0.746, 0.119);
+    //complex<double> ul = std::complex<double>(-0.747, 0.120);
+    //complex<double> lr = std::complex<double>(-0.746, 0.119);
+    complex<double> ul = std::complex<double>(-2, 1);
+    complex<double> lr = std::complex<double>(1, -1);
     std::thread render(draw_mandelbrot, ul, lr, 4);
     render.detach();
 
@@ -162,6 +164,7 @@ int main (int argc, char *argv[])
 		{
 			if (event.type == SDL_QUIT) { window_is_open = false; }
 		}
+        SDL_Delay(5);
 	}
 
     return 0;
