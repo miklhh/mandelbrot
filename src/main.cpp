@@ -5,10 +5,13 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 #include "color.h"
 #include "types.h"
 #include "supersampling.h"
+#include "render.h"
+
 
 extern const int scr_width = 600;
 extern const int scr_height = 400;
@@ -19,7 +22,7 @@ static SDL_Renderer* renderer = NULL;
 static bool window_is_open = true;
 
 /* Render buffer. */
-color_t render_buffer[scr_height][scr_width];
+static std::atomic<color_t> render_buffer[scr_height][scr_width];
 
 
 
@@ -30,7 +33,7 @@ void shutdown(std::string str)
 	window_is_open = false;
 }
 
-void draw_mandelbrot_iterate(int y_start, int y_end, scale_t scale, offset_t offset, color_t buffer[scr_height][scr_width])
+void draw_mandelbrot_iterate(int y_start, int y_end, scale_t scale, offset_t offset)
 {
     /* Iterate over each pixel on the screen and draw. */
     for (int px_y = y_start; px_y <= y_end; px_y++)
@@ -39,7 +42,8 @@ void draw_mandelbrot_iterate(int y_start, int y_end, scale_t scale, offset_t off
         {
             /* Get the color for the current pixel and store in the buffer. */
             color_t color = get_px_4x_ss(px_x, px_y, scale, offset);
-            buffer[px_y][px_x] = color;
+            //render_buffer[px_y][px_x] = color;
+            render_buffer[px_y][px_x].store(color);
         }
     }
 }
@@ -77,7 +81,8 @@ void draw_mandelbrot(complex<double> upper_left, complex<double> lower_right, ui
     {
         for (int x = 0; x < scr_width; x++)
         {
-            render_buffer[y][x] = color_t{ 0, 0, 0 };
+            //render_buffer[y][x] = color_t{ 0, 0, 0 };
+            render_buffer[y][x].store(color_t{ 0, 0, 0 });
         }
     }
     
@@ -87,7 +92,7 @@ void draw_mandelbrot(complex<double> upper_left, complex<double> lower_right, ui
         int lines_per_thread = scr_height / threads;
         int y_start = i * lines_per_thread;
         int y_end = (i + 1) * lines_per_thread;
-        thread_vector.push_back( thread(draw_mandelbrot_iterate, y_start, y_end, scale, offset, render_buffer) );
+        thread_vector.push_back( thread(draw_mandelbrot_iterate, y_start, y_end, scale, offset) );
     }
 
     while(1)
@@ -98,15 +103,15 @@ void draw_mandelbrot(complex<double> upper_left, complex<double> lower_right, ui
             {
                 SDL_SetRenderDrawColor(
                     renderer,
-                    render_buffer[y][x].red,
-                    render_buffer[y][x].green,
-                    render_buffer[y][x].blue,
-                    render_buffer[y][x].alpha);
+                    render_buffer[y][x].load().red,
+                    render_buffer[y][x].load().green,
+                    render_buffer[y][x].load().blue,
+                    render_buffer[y][x].load().alpha);
                 SDL_RenderDrawPoint(renderer, x, y);
             }
         }
         SDL_RenderPresent(renderer);
-        SDL_Delay(20);
+        SDL_Delay(10);
     }
 
 
@@ -140,11 +145,14 @@ int main (int argc, char *argv[])
 		return -1;
 	}
 
+    /* Initialize the mandelbrot renderer. */
+    render_init(4);
+
     /* Draw mandelbrot to the renderer and renderer to the screen. */
     using std::complex;
     complex<double> ul = std::complex<double>(-0.747, 0.120);
     complex<double> lr = std::complex<double>(-0.746, 0.119);
-    std::thread render(draw_mandelbrot, ul, lr, 2);
+    std::thread render(draw_mandelbrot, ul, lr, 4);
     render.detach();
 
 	while (window_is_open)

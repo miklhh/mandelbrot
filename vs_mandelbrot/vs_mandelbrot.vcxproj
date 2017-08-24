@@ -160,10 +160,12 @@
   <ItemGroup>
     <ClCompile Include="..\src\color.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\render.cpp" />
     <ClCompile Include="..\src\supersampling.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\color.h" />
+    <ClInclude Include="..\src\render.h" />
     <ClInclude Include="..\src\supersampling.h" />
     <ClInclude Include="..\src\types.h" />
   </ItemGroup>

@@ -18,10 +18,14 @@ struct offset_t
 
 struct color_t
 {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t alpha;
+    uint32_t red : 8;
+    uint32_t green : 8;
+    uint32_t blue : 8;
+    uint32_t alpha : 8;
+    //uint8_t red;
+    //uint8_t green;
+    //uint8_t blue;
+    //uint8_t alpha;
 };
 
 #endif
