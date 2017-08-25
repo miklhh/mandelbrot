@@ -162,11 +162,13 @@
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\render.cpp" />
     <ClCompile Include="..\src\supersampling.cpp" />
+    <ClCompile Include="..\src\thread_pool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\color.h" />
     <ClInclude Include="..\src\render.h" />
     <ClInclude Include="..\src\supersampling.h" />
+    <ClInclude Include="..\src\thread_pool.h" />
     <ClInclude Include="..\src\types.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
