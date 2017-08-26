@@ -6,6 +6,8 @@
 
 #include "render.h"
 #include "supersampling.h"
+#include "types.h"
+#include "thread_pool.h"
 
 
 using std::vector;
@@ -17,6 +19,7 @@ using std::atomic;
 extern const int scr_width;
 extern const int scr_height;
 static vector<vector<color_t>> render_buffer;
+static mandelbrot_threadpool thread_pool;
 static uint8_t threads;
 static bool rendering_complete;
 static scale_t scale;
@@ -25,21 +28,6 @@ bool render_initialized = false;
 
 
 
-/* Simple implementation of threadpool. */
-static class thread_pool
-{
-public:
-    /* Constructor. */
-    thread_pool(int n_threads)
-    {
-        m_threads = n_threads;
-        for (int i = 0; i < threads; i++) { m_render_threads.push_back(thread()); }
-    }
-
-private:
-    vector<thread> m_render_threads;
-    int m_threads;
-};
 
 /* Render a single pixel to the */
 static color_t render_get_px(int px_x, int px_y)

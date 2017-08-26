@@ -24,4 +24,12 @@ struct color_t
     uint32_t alpha : 8;
 };
 
+struct segment_t
+{
+    int x_bgn;
+    int y_bgn;
+    int x_end;
+    int y_end;
+};
+
 #endif
