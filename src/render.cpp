@@ -9,7 +9,6 @@
 #include "types.h"
 #include "thread_pool.h"
 
-
 using std::vector;
 using std::thread;
 using std::complex;
