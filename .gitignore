@@ -262,3 +262,5 @@ __pycache__/
 
 # --- NON VISUAL STUDIO IGNORES ---
 additional_dependencies/SDL2/
+*.bmp
+*.rar

@@ -27,7 +27,6 @@ bool render_initialized = false;
 
 
 
-
 /* Render a single pixel to the */
 static color_t render_get_px(int px_x, int px_y)
 {
@@ -41,7 +40,8 @@ static void render_segment(int px_x_bgn, int px_y_bgn, int px_x_end, int px_y_en
     {
         for (int px_x = px_x_bgn; px_x < px_x_end; px_x++)
         {
-            render_buffer[px_y][px_x] = render_get_px(px_x, px_y);
+            color_t color = render_get_px(px_x, px_y);
+            render_buffer[px_y][px_x] = color;
         }
     }
 }
@@ -74,13 +74,30 @@ void render_mandelbrot(complex<double> upper_left, complex<double> lower_right)
         return;
     }
 
+    /* Set the scale and the offset. */
+    scale.x = (lower_right.real() - upper_left.real()) / scr_width;
+    scale.y = (lower_right.imag() - upper_left.imag()) / scr_height;
+    offset.x = upper_left.real() + (lower_right.real() - upper_left.real()) / 2;
+    offset.y = lower_right.imag() + (upper_left.imag() - lower_right.imag()) / 2;
+    offset.y = -offset.y;   // Flip to get mathmatical y-value.
+
     /* Aquire the segments. */
-    int segment_size_x = scr_width / 32;
-    int segment_size_y = scr_height / 32;
+    int segment_size_x = scr_width / 8;
+    int segment_size_y = scr_height / 8;
     for (int y = 0; y < scr_height / segment_size_y; y++)
     {
         for (int x = 0; x < scr_width / segment_size_x; x++)
         {
+            std::cout
+                << "X start: "
+                << segment_size_x * x
+                << " X end: "
+                << segment_size_x * (x + 1)
+                << " Y start: "
+                << segment_size_y * y
+                << " Y end: "
+                << segment_size_y * (y + 1)
+                << std::endl;
             render_segment(
                 segment_size_x * x,
                 segment_size_y * y,
@@ -90,6 +107,8 @@ void render_mandelbrot(complex<double> upper_left, complex<double> lower_right)
         }
     }
 
+    /* Rendering is now done. */
+    rendering_complete = true;
 }
 
 
@@ -117,7 +136,27 @@ bool render_test_complete()
     return rendering_complete;
 }
 
-int render_create_bmp(char * file_name)
+int render_create_bmp(char* file_name)
 {
-    
+    /* Create a surface and unlock the pixels*/
+    std::cout << "Creating BMP." << std::endl;
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, scr_width, scr_height, 32, 0, 0, 0, 0);
+    SDL_LockSurface(surface);
+
+    for (int y = 0; y < scr_height; y++)
+    {
+        for (int x = 0; x < scr_width; x++)
+        {
+            ((SDL_Color*)surface->pixels)[y * scr_width + x].r = render_buffer[y][x].red;
+            ((SDL_Color*)surface->pixels)[y * scr_width + x].g = render_buffer[y][x].green;
+            ((SDL_Color*)surface->pixels)[y * scr_width + x].b = render_buffer[y][x].blue;
+            ((SDL_Color*)surface->pixels)[y * scr_width + x].a = render_buffer[y][x].alpha;
+        }
+    }
+
+
+    SDL_UnlockSurface(surface);
+    SDL_SaveBMP(surface, file_name);
+    std::cout << "BMP created." << std::endl;
+    return 0;
 }
