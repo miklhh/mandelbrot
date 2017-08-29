@@ -12,8 +12,8 @@
 #include "render.h"
 
 
-extern const int scr_width = 4096;
-extern const int scr_height = 4096;
+extern const int scr_width = 2048;
+extern const int scr_height = 2048;
 uint32_t max_iterations = 4000;
 
 static SDL_Window* window = NULL;
@@ -26,7 +26,6 @@ void shutdown(std::string str)
 	std::cout << "Error: " << str.c_str() << std::endl;
 	std::cout << "Shuting down." << std::endl;
     exit(1);
-	//window_is_open = false;
 }
 
 
@@ -56,7 +55,6 @@ int main (int argc, char *argv[])
 
 
     /* Draw mandelbrot to the renderer and renderer to the screen. */
-    using std::complex;
     bool once = true;
 	while (window_is_open)
 	{

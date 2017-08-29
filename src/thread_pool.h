@@ -2,8 +2,7 @@
  * Threadpool for drawing segments of the mandelbrot set.
  * 
  * Function explanations:
- * (1) int mandelbrot_threadpool_init(
- *          mandelbrot_threadpool* threadpool,
+ * (1) mandelbrot_threadpool* mandelbrot_threadpool_init(
  *          int threads,
  *          std::function<void(segment_t)> render_segment);
  *      Function for initializing a mandelbrot threadpool object. From the 
@@ -45,10 +44,9 @@ struct mandelbrot_threadpool
 };
 
 /* Functions */
-int mandelbrot_threadpool_add_job(mandelbrot_threadpool* threadpool, segment_t segment);
+void mandelbrot_threadpool_add_job(mandelbrot_threadpool* threadpool, segment_t segment);
 int mandelbrot_threadpool_destroy(mandelbrot_threadpool* threadpool);
-int mandelbrot_threadpool_init(
-    mandelbrot_threadpool* threadpool,
+mandelbrot_threadpool* mandelbrot_threadpool_init(
     int threads,
     std::function<void(segment_t)> render_segment);
 

@@ -1,5 +1,6 @@
 TODO:
 
+!0! DEADLOCK IN THREAD_POOL.CPP, 'jobs_mutex' won't unlock.
 1.  Start using the render module.
 2.	Start using the threadpool.
 3.	Fix the entire threadpool which is probably really, really broken...
