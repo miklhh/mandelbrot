@@ -12,8 +12,8 @@
 #include "render.h"
 
 
-extern const int scr_width = 2048;
-extern const int scr_height = 2048;
+extern const int scr_width = 1500;
+extern const int scr_height = 1000;
 uint32_t max_iterations = 4000;
 
 static SDL_Window* window = NULL;
@@ -58,13 +58,13 @@ int main (int argc, char *argv[])
     bool once = true;
 	while (window_is_open)
 	{
-        if (render_test_complete() && once)
-        {
+        //if (render_test_complete() && once)
+        //{
             render_draw_to_SDL_Renderer(renderer);
-            render_create_bmp("hello.bmp");
+        //    render_create_bmp("hello.bmp");
             SDL_RenderPresent(renderer);
-            once = false;
-        }
+        //    once = false;
+        //}
 
 
 		/* Handle events. */

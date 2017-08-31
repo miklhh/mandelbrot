@@ -36,21 +36,14 @@ static color_t render_get_px(int px_x, int px_y)
 /* Render a segment of the set. */
 static void render_segment(segment_t segment)
 {
-    /*
-    int px_x_bgn = segment.x_bgn;
-    int px_y_bgn = segment.y_bgn;
-    int px_x_end = segment.x_end;
-    int px_y_end = segment.y_end;
-    for (int px_y = px_y_bgn; px_y < px_y_end; px_y++)
+    std::cout << "Rendering segment!" << std::endl;
+    for (int y = segment.y_bgn; y < segment.y_end; y++)
     {
-        for (int px_x = px_x_bgn; px_x < px_x_end; px_x++)
+        for (int x = segment.x_bgn; x < segment.x_end; x++)
         {
-            color_t color = render_get_px(px_x, px_y);
-            render_buffer[px_y][px_x] = color;
+            render_buffer[y][x] = render_get_px(x, y);
         }
     }
-    */
-    mandelbrot_threadpool_add_job(thread_pool, segment);
 }
 
 /* Function for initializing a renderer. */
@@ -141,8 +134,8 @@ void render_mandelbrot(complex<double> upper_left, complex<double> lower_right)
                 segment_size_x * (1 + x),
                 segment_size_y * (1 + y)
             };
-            /* Render. */
-            render_segment(segment);
+            /* Add job to the thread pool. */
+            mandelbrot_threadpool_add_job(thread_pool, segment);
         }
     }
 

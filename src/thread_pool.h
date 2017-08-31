@@ -36,8 +36,8 @@ struct mandelbrot_threadpool
 {
     int n_threads;
     std::vector<std::thread> workers;
-    std::mutex busy_mutex;
-    std::vector<bool> busy;
+    std::mutex worker_busy_mutex;
+    std::vector<bool> worker_busy;
     std::mutex jobs_mutex;
     std::queue<segment_t> jobs;
     std::function<void(segment_t)> render_segment;
