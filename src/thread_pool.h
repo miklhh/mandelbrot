@@ -46,6 +46,7 @@ struct mandelbrot_threadpool
 /* Functions */
 void mandelbrot_threadpool_add_job(mandelbrot_threadpool* threadpool, segment_t segment);
 int mandelbrot_threadpool_destroy(mandelbrot_threadpool* threadpool);
+int mandelbrot_threadpool_get_active_workers(mandelbrot_threadpool* threadpool);
 mandelbrot_threadpool* mandelbrot_threadpool_init(
     int threads,
     std::function<void(segment_t)> render_segment);

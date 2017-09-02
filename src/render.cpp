@@ -17,7 +17,7 @@ using std::atomic;
 /* Render data. */
 extern const int scr_width;
 extern const int scr_height;
-static vector<vector<color_t>> render_buffer;
+static vector<vector<rgb_t>> render_buffer;
 static mandelbrot_threadpool* thread_pool;
 static uint8_t threads;
 static bool rendering_complete;
@@ -28,7 +28,7 @@ bool render_initialized = false;
 
 
 /* Render a single pixel to the */
-static color_t render_get_px(int px_x, int px_y)
+static rgb_t render_get_px(int px_x, int px_y)
 {
     return get_px_4x_ss(px_x, px_y, scale, offset);
 }
@@ -36,7 +36,6 @@ static color_t render_get_px(int px_x, int px_y)
 /* Render a segment of the set. */
 static void render_segment(segment_t segment)
 {
-    std::cout << "Rendering segment!" << std::endl;
     for (int y = segment.y_bgn; y < segment.y_end; y++)
     {
         for (int x = segment.x_bgn; x < segment.x_end; x++)
@@ -52,10 +51,10 @@ void render_init(int n_threads)
     /* Initialize render buffer. */
     for (int y = 0; y < scr_height; y++)
     {
-        render_buffer.push_back(vector<color_t>());
+        render_buffer.push_back(vector<rgb_t>());
         for (int x = 0; x < scr_width; x++)
         {
-            render_buffer.at(y).push_back(color_t{ 0, 0, 0, 0 });
+            render_buffer.at(y).push_back(rgb_t{ 0, 0, 0, 0 });
         }
     }
 
@@ -111,8 +110,8 @@ void render_mandelbrot(complex<double> upper_left, complex<double> lower_right)
     offset = get_offset(upper_left, lower_right);
 
     /* Aquire the segments. */
-    int segment_size_x = scr_width / 4;
-    int segment_size_y = scr_height / 4;
+    int segment_size_x = scr_width / 20;
+    int segment_size_y = scr_height / 20;
     for (int y = 0; y < scr_height / segment_size_y; y++)
     {
         for (int x = 0; x < scr_width / segment_size_x; x++)
@@ -138,9 +137,6 @@ void render_mandelbrot(complex<double> upper_left, complex<double> lower_right)
             mandelbrot_threadpool_add_job(thread_pool, segment);
         }
     }
-
-    /* Rendering is now done. */
-    rendering_complete = true;
 }
 
 
@@ -162,12 +158,21 @@ void render_draw_to_SDL_Renderer(SDL_Renderer* renderer)
     }
 }
 
-
+/* Temporarly, this needs a fix! */
 bool render_test_complete()
 {
-    return rendering_complete;
+    if (mandelbrot_threadpool_get_active_workers(thread_pool) == 0) { return true; }
+    else { return false; }
+   
 }
 
+/* Function for setting a pixel on an SDL_Surface. */
+static void set_pixel_to_surface(SDL_Surface* surface, )
+{
+
+}
+
+/* Function for creating a bmp and storing it in execution directory. */
 int render_create_bmp(char* file_name)
 {
     /* Create a surface and unlock the pixels*/
@@ -179,10 +184,16 @@ int render_create_bmp(char* file_name)
     {
         for (int x = 0; x < scr_width; x++)
         {
-            ((SDL_Color*)surface->pixels)[y * scr_width + x].r = render_buffer[y][x].red;
-            ((SDL_Color*)surface->pixels)[y * scr_width + x].g = render_buffer[y][x].green;
-            ((SDL_Color*)surface->pixels)[y * scr_width + x].b = render_buffer[y][x].blue;
-            ((SDL_Color*)surface->pixels)[y * scr_width + x].a = render_buffer[y][x].alpha;
+            int bpp = surface->format->BitsPerPixel;
+            
+            /*
+            SDL_PixelFormat* pixel_format = surface->format;
+            SDL_Palette* palette = pixel_format->palette;
+            ((SDL_Color*) palette->colors)[y * scr_width + x].r = render_buffer[y][x].red;
+            ((SDL_Color*) palette->colors)[y * scr_width + x].g = render_buffer[y][x].green;
+            ((SDL_Color*) palette->colors)[y * scr_width + x].b = render_buffer[y][x].blue;
+            ((SDL_Color*) palette->colors)[y * scr_width + x].a = render_buffer[y][x].alpha;
+            */
         }
     }
 

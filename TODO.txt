@@ -1,6 +1,6 @@
 TODO:
 
-!0! DEADLOCK IN THREAD_POOL.CPP, 'jobs_mutex' won't unlock.
-1.  Start using the render module.
-2.	Start using the threadpool.
-3.	Fix the entire threadpool which is probably really, really broken...
+
+1.	Make thread pool thread safe without deadlocking the damn thing.
+2.	I broke the render_create_bmp function. Plis fix.
+3.  Return all the resource before exiting the program through exit-button.

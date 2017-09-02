@@ -5,71 +5,73 @@
 #include "color.h"
 #include "types.h"
 
-/* Coloring functions for red, green and blue.*/
-uint8_t color_r(uint32_t n, std::complex<double> zn)
+/* Conversion from wikipedia: 
+ * https://en.wikipedia.org/wiki/HSL_and_HSV#Converting_to_RGB 
+ */
+static rgb_t hsl_to_rgb(hsl_t hsl)
 {
-    //extern uint32_t max_iterations;
-    //double t = double(n) / double(max_iterations);
-    //uint8_t r = uint8_t((9 * (1 - t) * t * t * t * 255));
-    //return r; 
+    const double pi = 3.1415926535;
+    double chroma = (double(1) - abs(2 * hsl.light - 1)) * hsl.saturation;
+    double hue_prime = hsl.hue / (pi / 3);
+    double x = chroma * (1 - abs(fmod(hue_prime, 2) - 1));
 
-    //uint32_t return_value = 1 + n - log(log(abs(zn))) / log(2.0);
-    //return uint8_t(return_value);
-    return 0;
+    double r1 = 0;
+    double g1 = 0;
+    double b1 = 0;
+         if (0 <= hue_prime && hue_prime <= 1) { r1 = chroma;  g1 = x;       b1 = 0;      }
+    else if (1 <= hue_prime && hue_prime <= 2) { r1 = x;       g1 = chroma;  b1 = 0;      }
+    else if (2 <= hue_prime && hue_prime <= 3) { r1 = 0;       g1 = chroma;  b1 = x;      }
+    else if (3 <= hue_prime && hue_prime <= 4) { r1 = 0;       g1 = x;       b1 = chroma; }
+    else if (4 <= hue_prime && hue_prime <= 5) { r1 = x;       g1 = 0;       b1 = chroma; }
+    else if (5 <= hue_prime && hue_prime <= 6) { r1 = chroma;  g1 = 0;       b1 = x;      }
 
-
+    double m = hsl.light - chroma / 2;
+    uint8_t r = uint8_t((r1 + m) * 255);
+    uint8_t g = uint8_t((g1 + m) * 255);
+    uint8_t b = uint8_t((b1 + m) * 255);
+    rgb_t color = { r, g, b, 0 };
+    return color;
 }
 
-uint8_t color_g(uint32_t n, std::complex<double> zn)
+/* Get the color value if iterations is the number of iterations requiered to
+ * escape the 'escape-radius' and zn is the final value of the series when it
+ * has surpasst the 'escape-radius. Based on wikipedias 'smooth-coloring'. */
+static double color_value(int iterations, std::complex<double> zn)
 {
-    //extern uint32_t max_iterations;
-    //double t = double(n) / double(max_iterations);
-    //uint8_t g = uint8_t((15 * (1 - t) * (1 - t) * t * t * 255));
-    //return g;
-
-    //uint32_t return_value = 1 + n - log(log(abs(zn))) / log(2.0);
-    //return uint8_t(return_value);
-    return 0;
-
-
+    const double escape_radius = 2.0;
+    return double(iterations) - log2( log( abs(zn) ) / log(escape_radius) );
 }
-
-uint8_t color_b(uint32_t n, std::complex<double> zn)
-{
-    //extern uint32_t max_iterations;
-    //double t = double(n) / double(max_iterations);
-    //uint8_t b = uint8_t(8.5 * (1 - t) * (1 - t) * (1 - t) * t * 255);
-    //return b;
-
-    uint32_t return_value = 1 + n - log(log(abs(zn))) / log(2.0);
-    return uint8_t(return_value);
-}
-
 
 /* Function sets the color to draw. */
-color_t get_color(
-    uint32_t iterations,
-    std::complex<double> zn)
+rgb_t get_color(int iterations, std::complex<double> zn)
 {
-    color_t color;
-    color.alpha = 0;
-    color.red = 0;
-    color.green = 0;
-    color.blue = 0;
+    rgb_t color{ 0, 0, 0, 0 };
 
     /* If it converges. */
     extern uint32_t max_iterations;
     if (iterations == max_iterations)
     {
-        color.red = 0;
-        color.green = 0;
-        color.blue = 0;
+        return color;
     }
     else
     {
-        color.red = color_r(iterations, zn);
-        color.green = color_g(iterations, zn);
-        color.blue = color_b(iterations, zn);
+        /*
+         * Coloring algorithm by Paride:
+         * http://www.paridebroggi.com/2015/05/fractal-continuous-coloring.html 
+         */
+        /*
+        color.red = uint8_t(sin(0.016 * color_value(iterations, zn) + 4) * 100 + 155);
+        color.green = uint8_t(sin(0.013 * color_value(iterations, zn) + 2) * 100 + 155);
+        color.blue = uint8_t(sin(0.010 * color_value(iterations, zn) + (3.1415/2)) * 100 + 155);
+        return color;
+        */
+        const double pi = 3.1415926535;
+        rgb_t color = hsl_to_rgb(
+        { 
+            sin(0.016 * color_value(iterations, zn) + 4) * pi + pi, 
+            sin(0.013 * color_value(iterations, zn) + 2) * 0.5 + 0.5,
+            sin(0.010 * color_value(iterations, zn) + 0) * 0.5 + 0.5
+        });
+        return color;
     }
-    return color;
 }

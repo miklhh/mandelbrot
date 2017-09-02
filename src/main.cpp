@@ -12,9 +12,9 @@
 #include "render.h"
 
 
-extern const int scr_width = 1500;
-extern const int scr_height = 1000;
-uint32_t max_iterations = 4000;
+extern const int scr_width = 1920;
+extern const int scr_height = 1080;
+uint32_t max_iterations = 1000;
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -46,26 +46,29 @@ int main (int argc, char *argv[])
 	}
 
     /* Initialize the mandelbrot renderer. */
-    complex<double> ul = std::complex<double>(-0.747, 0.120);
-    complex<double> lr = std::complex<double>(-0.746, 0.119);
-    //complex<double> ul = std::complex<double>(-2, 1);
-    //complex<double> lr = std::complex<double>(1, -1);
+    //complex<double> ul = std::complex<double>(-0.7455, 0.1190);
+    //complex<double> lr = std::complex<double>(-0.7445, 0.1180);
+    //complex<double> ul = std::complex<double>(-0.746, 0.120);
+    //complex<double> lr = std::complex<double>(-0.745, 0.119);
+    complex<double> ul = std::complex<double>(-2, 1);
+    complex<double> lr = std::complex<double>(1, -1);
     render_init(4);
     std::thread render_thread(render_mandelbrot, ul, lr);
 
 
     /* Draw mandelbrot to the renderer and renderer to the screen. */
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     bool once = true;
 	while (window_is_open)
 	{
-        //if (render_test_complete() && once)
-        //{
-            render_draw_to_SDL_Renderer(renderer);
-        //    render_create_bmp("hello.bmp");
-            SDL_RenderPresent(renderer);
-        //    once = false;
-        //}
+        if (render_test_complete() && once)
+        {
+            render_create_bmp("hello.bmp");
+            once = false;
+        }
 
+        render_draw_to_SDL_Renderer(renderer);
+        SDL_RenderPresent(renderer);
 
 		/* Handle events. */
 		while (SDL_PollEvent(&event))

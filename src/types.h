@@ -16,12 +16,19 @@ struct offset_t
     double y;
 };
 
-struct color_t
+struct rgb_t
 {
     uint32_t red : 8;
     uint32_t green : 8;
     uint32_t blue : 8;
     uint32_t alpha : 8;
+};
+
+struct hsl_t
+{
+    double hue;         // 'Hue' mesuared in radians [0, 2*pi].
+    double saturation;  // 'Saturation' [0, 1].
+    double light;       // 'Light' [0, 1].
 };
 
 struct segment_t

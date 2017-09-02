@@ -8,12 +8,35 @@ extern const int scr_width;
 extern const int scr_height;
 extern uint32_t max_iterations;
 
+/* Get the average of four numbers. */
 static uint8_t get_average(uint8_t c1, uint8_t c2, uint8_t c3, uint8_t c4)
 {
     return (uint32_t(c1) + uint32_t(c2) + uint32_t(c3) + uint32_t(c4)) / 4;
 }
 
-color_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
+/* Get a pixel without supersampling. */
+rgb_t get_px_1x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
+{
+    using std::complex;
+    double x = double((px_x - scr_width / 2) * scale.x + offset.x);
+    double y = double((px_y - scr_height / 2) * scale.y + offset.y);
+    complex<double> c(x, y);
+    complex<double> z(0, 0);
+
+
+    complex<double> c1(x, y);
+    complex<double> z1(0, 0);
+    uint32_t iterations = 0;
+    for (iterations; iterations < max_iterations; iterations++)
+    {
+        z1 = z1 * z1 + c1;
+        if (abs(z1) > 2.0) { break; }
+    }
+    return get_color(iterations, z1);
+}
+
+/* Get a px with 4 times supersampling. */
+rgb_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
 {
     using std::complex;
     double x = double((px_x - scr_width / 2) * scale.x + offset.x);
@@ -35,7 +58,7 @@ color_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z1 = z1 * z1 + c1;
         if (abs(z1) > 2.0) { break; }
     }
-    color_t color1 = get_color(iterations1, z1);
+    rgb_t color1 = get_color(iterations1, z1);
 
     /* 'Pixel': 2. */
     complex<double> c2(c.real() - scale.x / 4, c.imag() + scale.y / 4);
@@ -46,7 +69,7 @@ color_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z2 = z2 * z2 + c2;
         if (abs(z2) > 2.0) { break; }
     }
-    color_t color2 = get_color(iterations2, z2);
+    rgb_t color2 = get_color(iterations2, z2);
 
     /* 'Pixel': 3. */
     complex<double> c3(c.real() + scale.x / 4, c.imag() - scale.y / 4);
@@ -57,7 +80,7 @@ color_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z3 = z3 * z3 + c3;
         if (abs(z3) > 2.0) { break; }
     }
-    color_t color3 = get_color(iterations3, z3);
+    rgb_t color3 = get_color(iterations3, z3);
 
     /* 'Pixel': 4. */
     complex<double> c4(c.real() + scale.x / 4, c.imag() + scale.y / 4);
@@ -68,10 +91,10 @@ color_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z4 = z4 * z4 + c4;
         if (abs(z4) > 2.0) { break; }
     }
-    color_t color4 = get_color(iterations4, z4);
+    rgb_t color4 = get_color(iterations4, z4);
 
     /* Calculate the avrage. */
-    color_t color;
+    rgb_t color;
     color.alpha = get_average(color1.alpha, color2.alpha, color3.alpha, color4.alpha);
     color.blue = get_average(color1.blue, color2.blue, color3.blue, color4.blue);
     color.green = get_average(color1.green, color2.green, color3.green, color4.green);
