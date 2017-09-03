@@ -167,9 +167,9 @@ bool render_test_complete()
 }
 
 /* Function for setting a pixel on an SDL_Surface. */
-static void set_pixel_to_surface(SDL_Surface* surface, )
+static void set_pixel_on_surface(SDL_Surface* surface, int x, int y, rgb_t pixel)
 {
-
+    ((rgb_t*)surface->pixels)[y * scr_width + x] = pixel;
 }
 
 /* Function for creating a bmp and storing it in execution directory. */
@@ -184,7 +184,7 @@ int render_create_bmp(char* file_name)
     {
         for (int x = 0; x < scr_width; x++)
         {
-            int bpp = surface->format->BitsPerPixel;
+            set_pixel_on_surface(surface, x, y, render_buffer[y][x]);
             
             /*
             SDL_PixelFormat* pixel_format = surface->format;

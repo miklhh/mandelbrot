@@ -24,15 +24,14 @@ rgb_t get_px_1x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
     complex<double> z(0, 0);
 
 
-    complex<double> c1(x, y);
-    complex<double> z1(0, 0);
+
     uint32_t iterations = 0;
     for (iterations; iterations < max_iterations; iterations++)
     {
-        z1 = z1 * z1 + c1;
-        if (abs(z1) > 2.0) { break; }
+        z = z * z + c;
+        if (abs(z) > 2.0) { break; }
     }
-    return get_color(iterations, z1);
+    return get_color(iterations, z, c);
 }
 
 /* Get a px with 4 times supersampling. */
@@ -58,7 +57,7 @@ rgb_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z1 = z1 * z1 + c1;
         if (abs(z1) > 2.0) { break; }
     }
-    rgb_t color1 = get_color(iterations1, z1);
+    rgb_t color1 = get_color(iterations1, z1, c1);
 
     /* 'Pixel': 2. */
     complex<double> c2(c.real() - scale.x / 4, c.imag() + scale.y / 4);
@@ -69,7 +68,7 @@ rgb_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z2 = z2 * z2 + c2;
         if (abs(z2) > 2.0) { break; }
     }
-    rgb_t color2 = get_color(iterations2, z2);
+    rgb_t color2 = get_color(iterations2, z2, c2);
 
     /* 'Pixel': 3. */
     complex<double> c3(c.real() + scale.x / 4, c.imag() - scale.y / 4);
@@ -80,7 +79,7 @@ rgb_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z3 = z3 * z3 + c3;
         if (abs(z3) > 2.0) { break; }
     }
-    rgb_t color3 = get_color(iterations3, z3);
+    rgb_t color3 = get_color(iterations3, z3, c3);
 
     /* 'Pixel': 4. */
     complex<double> c4(c.real() + scale.x / 4, c.imag() + scale.y / 4);
@@ -91,7 +90,7 @@ rgb_t get_px_4x_ss(int px_x, int px_y, scale_t scale, offset_t offset)
         z4 = z4 * z4 + c4;
         if (abs(z4) > 2.0) { break; }
     }
-    rgb_t color4 = get_color(iterations4, z4);
+    rgb_t color4 = get_color(iterations4, z4, c4);
 
     /* Calculate the avrage. */
     rgb_t color;

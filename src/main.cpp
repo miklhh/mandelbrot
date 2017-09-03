@@ -14,7 +14,7 @@
 
 extern const int scr_width = 1920;
 extern const int scr_height = 1080;
-uint32_t max_iterations = 1000;
+uint32_t max_iterations = 5000;
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -46,12 +46,22 @@ int main (int argc, char *argv[])
 	}
 
     /* Initialize the mandelbrot renderer. */
+    
+    //complex<double> ul = std::complex<double>(-0.74510, 0.11868);
+    //complex<double> lr = std::complex<double>(-0.74490, 0.11848);
+
+    /* Fractal. */
     //complex<double> ul = std::complex<double>(-0.7455, 0.1190);
     //complex<double> lr = std::complex<double>(-0.7445, 0.1180);
+
+    /* Fractal zoomed out. */
     //complex<double> ul = std::complex<double>(-0.746, 0.120);
     //complex<double> lr = std::complex<double>(-0.745, 0.119);
+
+    /* Original fractal. */
     complex<double> ul = std::complex<double>(-2, 1);
     complex<double> lr = std::complex<double>(1, -1);
+
     render_init(4);
     std::thread render_thread(render_mandelbrot, ul, lr);
 

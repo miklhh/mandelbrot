@@ -6,6 +6,6 @@
 #include "types.h"
 
 /* Get the propriete color for a pixel. */
-rgb_t get_color(int iterations, std::complex<double> zn);
+rgb_t get_color(int iterations, std::complex<double> zn, std::complex<double> c);
 
 #endif
