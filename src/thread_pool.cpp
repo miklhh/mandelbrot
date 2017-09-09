@@ -3,12 +3,14 @@
 #include "thread_pool.h"
 
 
-static void mandelbrot_threadpool_thread_callback(
+static void mandelbrot_thread_pool_thread_callback(
     mandelbrot_threadpool* threadpool,
     int thread_index
 )
 {
     /* Test if there is any job to do. Someone might have snatched our job. */
+    std::unique_lock<std::mutex> worker_busy_lock(threadpool->worker_busy_mutex);
+    std::unique_lock<std::mutex> jobs_lock(threadpool->jobs_mutex);
     if (threadpool->jobs.empty())
     {
         /* Another thread has snated out work. Return. */
@@ -17,22 +19,24 @@ static void mandelbrot_threadpool_thread_callback(
     }
     else
     {
-        /* Get the job that needs to be done. */
+        /* Get the job that needs to be done and start working the jobs.*/
         segment_t current_segment = threadpool->jobs.front();
         threadpool->jobs.pop();
-
-        /* Let the thread iterate as long as there is job to do. */
-        while (1)
+        jobs_lock.unlock();
+        worker_busy_lock.unlock();
+        while (1) 
         {
-            /* Render the current segment. */
+            /* Render the current segment and try to get a new job.*/
             threadpool->render_segment(current_segment);
-
-            /* Try to get a new job if available. */
+            jobs_lock.lock();
             if (threadpool->jobs.empty())
             {
                 /* No more jobs. Return this thread. */
+                jobs_lock.unlock();
+                worker_busy_lock.lock();
                 threadpool->worker_busy.at(thread_index) = false;
-                std::cout << "Thread Returning." << std::endl;
+                worker_busy_lock.unlock();
+                std::cout << "Thread Returning." << std::endl;     // DEBUGING.
                 return;
             }
             else
@@ -40,15 +44,17 @@ static void mandelbrot_threadpool_thread_callback(
                 /* More jobs to be done! */
                 current_segment = threadpool->jobs.front();
                 threadpool->jobs.pop();
+                jobs_lock.unlock();
             }
         }
     }
 }
 
 
-static void mandelbrot_threadpool_launch(mandelbrot_threadpool* threadpool)
+static void mandelbrot_thread_pool_launch(mandelbrot_threadpool* threadpool)
 {
     /* Try to find a free thread. */
+    std::unique_lock<std::mutex> worker_busy_lock(threadpool->jobs_mutex);
     int index_next_free_thread = -1;
     for (int i = 0; i < threadpool->n_threads; i++)
     {
@@ -58,45 +64,38 @@ static void mandelbrot_threadpool_launch(mandelbrot_threadpool* threadpool)
             break;
         }
     }
-
     /* Act acordingly if thread has been found. */
     if (index_next_free_thread != -1)
     {
         /* A free thread has been found. Launch it. */
-
         threadpool->worker_busy.at(index_next_free_thread) = true;
-
         threadpool->workers.at(index_next_free_thread) = std::thread(
-            mandelbrot_threadpool_thread_callback,
+            mandelbrot_thread_pool_thread_callback,
             threadpool,
-            index_next_free_thread
-        );
+            index_next_free_thread);
+        threadpool->workers.at(index_next_free_thread).detach();
     }
 }
 
-mandelbrot_threadpool* mandelbrot_threadpool_init(
-        int threads,
-        std::function<void(segment_t)> render_segment_callback)
+/* Initialize a mandelbrot thread pool. */
+mandelbrot_threadpool* mandelbrot_thread_pool_create(
+    int threads,
+    std::function<void(segment_t)> render_segment_callback)
 {
-    /* Allocate the threadpool. */
+    /* Allocate the threadpool and set it up. */
     mandelbrot_threadpool* threadpool = new mandelbrot_threadpool;
-
-    /* Setup the threadpool. */
     if (!threadpool == NULL) 
     {
         /* Create the proper amount of thread objects. */
         for (int i = 0; i < threads; i++)
         {
-            /* No need to lock mutex since no new threads are running. */
+            /* No need to lock mutex since no other threads are using resources. */
             threadpool->workers.push_back(std::thread());
             threadpool->worker_busy.push_back(false);
         }
-
         /* Set threadpool data. */
         threadpool->render_segment = render_segment_callback;
         threadpool->n_threads = threads;
-
-        /* Threadpool successfully created return accordingly. */
         return threadpool;
     }
     else 
@@ -107,17 +106,19 @@ mandelbrot_threadpool* mandelbrot_threadpool_init(
 
 
 
-void mandelbrot_threadpool_add_job(mandelbrot_threadpool* threadpool, segment_t segment)
+void mandelbrot_thread_pool_add_job(
+    mandelbrot_threadpool* threadpool, 
+    segment_t segment)
 {
     /* Add the job to the job queue and launch the thread pool. */
     std::unique_lock<std::mutex> jobs_lock(threadpool->jobs_mutex);
     threadpool->jobs.push(segment);
     jobs_lock.unlock();
-    mandelbrot_threadpool_launch(threadpool);
+    mandelbrot_thread_pool_launch(threadpool);
 }
 
 /* Destroy a threadpool. */
-int mandelbrot_threadpool_destroy(mandelbrot_threadpool * threadpool)
+int mandelbrot_thread_pool_destroy(mandelbrot_threadpool * threadpool)
 {
     for (int i = 0; i < threadpool->n_threads; i++)
     {
@@ -127,10 +128,10 @@ int mandelbrot_threadpool_destroy(mandelbrot_threadpool * threadpool)
     return 0;
 }
 
-int mandelbrot_threadpool_get_active_workers(mandelbrot_threadpool * threadpool)
+int mandelbrot_thread_pool_get_active_workers(mandelbrot_threadpool * threadpool)
 {
-    int active_workers = 0;
     std::lock_guard<std::mutex> lock_worker_busy(threadpool->worker_busy_mutex);
+    int active_workers = 0;
     for (int i = 0; i < threadpool->n_threads; i++)
     {
         if (threadpool->worker_busy.at(i)) { active_workers++; }

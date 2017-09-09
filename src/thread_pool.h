@@ -2,24 +2,31 @@
  * Threadpool for drawing segments of the mandelbrot set.
  * 
  * Function explanations:
- * (1) mandelbrot_threadpool* mandelbrot_threadpool_init(
+ *
+ * (1) mandelbrot_threadpool* mandelbrot_thread_pool_create(
  *          int threads,
  *          std::function<void(segment_t)> render_segment);
- *      Function for initializing a mandelbrot threadpool object. From the 
- *      moment this functinocal has been made (and return succes == 0) the
- *      threadpool is ready to take jobs. Each initialized threadpools should
- *      by its initializer accordingly use mandelbrot_threadpool_destroy to 
- *      destroy the threadpool and return it's resourcese to prevent memoryleaks.
+ *     --
+ *     Function for creating a threadpool. Returns a pointer to the thred 
+ *     pool on success. Each initialized threadpool should
+ *     by its initializer accordingly use mandelbrot_threadpool_destroy to 
+ *     destroy the threadpool and return it's resourcese to prevent 
+ *     memoryleaks. The threadpool should only be initialized once. 
+ *     Initilizing a thread pool than one time causes undefined behaviour.
+ *     --
  *
- * (2) int mandelbrot_threadpool_destroy(mandelbrot_threadpool* threadpool);
- *      Destroy a mandelbrot threadpool. This function releases all the memory
- *      that is held by a mandelbrot threadpool object.
+ * (2) int mandelbrot_thread_pool_destroy(mandelbrot_threadpool* threadpool);
+ *     --
+ *     Destroy a mandelbrot threadpool. This function releases all the memory
+ *     that is held by a mandelbrot threadpool object.
+ *     --
  *
- * (3) int mandelbrot_threadpool_add_job(segment_t segment)
- *      Add a job to the threadpool. This job will automaticly launch if any
- *      worker is free, otherwise it will be put in a queue.
+ * (3) int mandelbrot_thread_pool_add_job(segment_t segment);
+ *     --
+ *     Add a job to the threadpool. This job will automaticly launch if any
+ *     worker is free, otherwise it will be put in a queue.
+ *     --
  */
-
 
 
 #ifndef MANDELBROT_THREAD_POOL_H
@@ -44,10 +51,10 @@ struct mandelbrot_threadpool
 };
 
 /* Functions */
-void mandelbrot_threadpool_add_job(mandelbrot_threadpool* threadpool, segment_t segment);
-int mandelbrot_threadpool_destroy(mandelbrot_threadpool* threadpool);
-int mandelbrot_threadpool_get_active_workers(mandelbrot_threadpool* threadpool);
-mandelbrot_threadpool* mandelbrot_threadpool_init(
+void mandelbrot_thread_pool_add_job(mandelbrot_threadpool* threadpool, segment_t segment);
+int mandelbrot_thread_pool_destroy(mandelbrot_threadpool* threadpool);
+int mandelbrot_thread_pool_get_active_workers(mandelbrot_threadpool* threadpool);
+mandelbrot_threadpool* mandelbrot_thread_pool_create(
     int threads,
     std::function<void(segment_t)> render_segment);
 

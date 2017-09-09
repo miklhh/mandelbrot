@@ -21,7 +21,7 @@ static SDL_Renderer* renderer = NULL;
 static bool window_is_open = true;
 
 
-void shutdown(std::string str)
+void shutdown(std::string str, uint8_t exit_code)
 {
 	std::cout << "Error: " << str.c_str() << std::endl;
 	std::cout << "Shuting down." << std::endl;
@@ -59,8 +59,8 @@ int main (int argc, char *argv[])
     //complex<double> lr = std::complex<double>(-0.745, 0.119);
 
     /* Original fractal. */
-    complex<double> ul = std::complex<double>(-2, 1);
-    complex<double> lr = std::complex<double>(1, -1);
+    std::complex<double> ul = std::complex<double>(-2, 1);
+    std::complex<double> lr = std::complex<double>(1, -1);
 
     render_init(4);
     std::thread render_thread(render_mandelbrot, ul, lr);

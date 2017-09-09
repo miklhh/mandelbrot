@@ -18,7 +18,7 @@ using std::atomic;
 extern const int scr_width;
 extern const int scr_height;
 static vector<vector<rgb_t>> render_buffer;
-static mandelbrot_threadpool* thread_pool;
+static mandelbrot_threadpool* thread_pool = NULL;
 static uint8_t threads;
 static bool rendering_complete;
 static scale_t scale;
@@ -26,15 +26,14 @@ static offset_t offset;
 bool render_initialized = false;
 
 
-
 /* Render a single pixel to the */
 static rgb_t render_get_px(int px_x, int px_y)
 {
-    return get_px_4x_ss(px_x, px_y, scale, offset);
+    return get_px_4x_ss(px_x, px_y);
 }
 
 /* Render a segment of the set. */
-static void render_segment(segment_t segment)
+static void render_segment(const segment_t & segment)
 {
     for (int y = segment.y_bgn; y < segment.y_end; y++)
     {
@@ -59,7 +58,7 @@ void render_init(int n_threads)
     }
 
     /* Initialize the thread pool. */
-    thread_pool = mandelbrot_threadpool_init(n_threads, render_segment);
+    thread_pool = mandelbrot_thread_pool_create(n_threads, render_segment);
     if (thread_pool == NULL)
     {
         std::cerr << "Error initializeing threadpool, exiting." << std::endl;
@@ -68,7 +67,6 @@ void render_init(int n_threads)
         #endif  
         exit(1);
     }
-
     /* Initialze render data. */
     threads = n_threads;
     rendering_complete = false;
@@ -104,37 +102,22 @@ void render_mandelbrot(complex<double> upper_left, complex<double> lower_right)
         std::cerr << "Renderer not initialized. Could not render." << std::endl;
         return;
     }
-
-    /* Set the scale and the offset. */
+    /* Set the scale and the offset and aquire the segments. */
     scale = get_scale(upper_left, lower_right);
     offset = get_offset(upper_left, lower_right);
-
-    /* Aquire the segments. */
+    supersample_init(scale, offset);
     int segment_size_x = scr_width / 20;
     int segment_size_y = scr_height / 20;
     for (int y = 0; y < scr_height / segment_size_y; y++)
     {
         for (int x = 0; x < scr_width / segment_size_x; x++)
         {
-            // DEBUGING!
-            std::cout
-                << "X start: "
-                << segment_size_x * x
-                << " X end: "
-                << segment_size_x * (x + 1)
-                << " Y start: "
-                << segment_size_y * y
-                << " Y end: "
-                << segment_size_y * (y + 1)
-                << std::endl;
             segment_t segment = {
                 segment_size_x * x,
                 segment_size_y * y,
                 segment_size_x * (1 + x),
-                segment_size_y * (1 + y)
-            };
-            /* Add job to the thread pool. */
-            mandelbrot_threadpool_add_job(thread_pool, segment);
+                segment_size_y * (1 + y)};
+            mandelbrot_thread_pool_add_job(thread_pool, segment);
         }
     }
 }
@@ -151,8 +134,7 @@ void render_draw_to_SDL_Renderer(SDL_Renderer* renderer)
                 render_buffer[y][x].red,
                 render_buffer[y][x].green,
                 render_buffer[y][x].blue,
-                render_buffer[y][x].alpha
-            );
+                render_buffer[y][x].alpha);
             SDL_RenderDrawPoint(renderer, x, y);
         }
     }
@@ -161,9 +143,7 @@ void render_draw_to_SDL_Renderer(SDL_Renderer* renderer)
 /* Temporarly, this needs a fix! */
 bool render_test_complete()
 {
-    if (mandelbrot_threadpool_get_active_workers(thread_pool) == 0) { return true; }
-    else { return false; }
-   
+    return !mandelbrot_thread_pool_get_active_workers(thread_pool) ? true : false;
 }
 
 /* Function for setting a pixel on an SDL_Surface. */
@@ -179,24 +159,13 @@ int render_create_bmp(char* file_name)
     std::cout << "Creating BMP." << std::endl;
     SDL_Surface* surface = SDL_CreateRGBSurface(0, scr_width, scr_height, 32, 0, 0, 0, 0);
     SDL_LockSurface(surface);
-
     for (int y = 0; y < scr_height; y++)
     {
         for (int x = 0; x < scr_width; x++)
         {
             set_pixel_on_surface(surface, x, y, render_buffer[y][x]);
-            
-            /*
-            SDL_PixelFormat* pixel_format = surface->format;
-            SDL_Palette* palette = pixel_format->palette;
-            ((SDL_Color*) palette->colors)[y * scr_width + x].r = render_buffer[y][x].red;
-            ((SDL_Color*) palette->colors)[y * scr_width + x].g = render_buffer[y][x].green;
-            ((SDL_Color*) palette->colors)[y * scr_width + x].b = render_buffer[y][x].blue;
-            ((SDL_Color*) palette->colors)[y * scr_width + x].a = render_buffer[y][x].alpha;
-            */
         }
     }
-
     SDL_UnlockSurface(surface);
     SDL_SaveBMP(surface, file_name);
     std::cout << "BMP created." << std::endl;

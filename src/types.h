@@ -1,3 +1,7 @@
+/*
+ * Types used throughout the program.
+ */
+
 #ifndef _MANDELBROT_TYPES_H
 #define _MANDELBROT_TYPES_H
 

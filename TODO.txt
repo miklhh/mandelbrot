@@ -3,4 +3,5 @@ TODO:
 
 1.	Make thread pool thread safe without deadlocking the damn thing.
 2.	I broke the render_create_bmp function. Plis fix.
-3.  Return all the resource before exiting the program through exit-button.
+3.  Return all the resources before exiting the program through exit-button.
+4.  destroy_threadpool function needs a fixer-upper.
