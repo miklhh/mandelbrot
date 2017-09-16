@@ -24,13 +24,12 @@ static double shift_range(double value, double range_lower, double range_higher)
     return value;
 }
 
-/* Conversion from wikipedia: 
+/* 
+ * Conversion from wikipedia: 
  * https://en.wikipedia.org/wiki/HSL_and_HSV#Converting_to_RGB 
  */
 static rgb_t hsl_to_rgb(hsl_t hsl)
 {
-    
-
     /* Make sure that the hue is in it's correct spectrum. */
     hsl.hue = shift_range(hsl.hue, 0, 2*pi);
     double hue_prime = hsl.hue / (pi / 3);
@@ -64,9 +63,8 @@ static double get_convergence_value(
     std::complex<double> zn, 
     std::complex<double> c)
 {
-    const double escape_radius = 2.0;
-
     /* Enchance the divirging point to get a 'smoother' value. */
+    const double escape_radius = 2.0;
     for (int i = 0; i < 5; i++)
     {
         zn = zn * zn + c;
@@ -76,7 +74,10 @@ static double get_convergence_value(
 }
 
 /* Function sets the color to draw. */
-rgb_t get_color(int iterations, std::complex<double> zn, std::complex<double> c)
+rgb_t get_color(
+    int iterations, 
+    const std::complex<double> & zn, 
+    const std::complex<double> & c)
 {
     rgb_t color{ 0, 0, 0, 0 };
 
@@ -88,26 +89,13 @@ rgb_t get_color(int iterations, std::complex<double> zn, std::complex<double> c)
     }
     else
     {
-        /*
-         * Coloring algorithm by Paride:
-         * http://www.paridebroggi.com/2015/05/fractal-continuous-coloring.html 
-         */
-        /*
-        color.red = uint8_t(sin(0.016 * color_value(iterations, zn) + 4) * 100 + 155);
-        color.green = uint8_t(sin(0.013 * color_value(iterations, zn) + 2) * 100 + 155);
-        color.blue = uint8_t(sin(0.010 * color_value(iterations, zn) + (3.1415/2)) * 100 + 155);
-        return color;
-        */
         double convergence_value = get_convergence_value(iterations, zn, c);
         rgb_t color = hsl_to_rgb(
-        {
-            //amplitude_h * sin(frequency_h * convergence_value + phase_h) + offset_h,
-            log(10 * convergence_value),
-            //amplitude_s * sin(frequency_s * convergence_value + phase_s) + offset_s,
-            1,
-            0.7
-        });
-        //std::cout << convergence_value / 5000 * (2 * pi) << std::endl;
+            {
+                log(10 * convergence_value),
+                1,
+                0.7
+            });
         return color;
     }
 }

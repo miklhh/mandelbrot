@@ -1,11 +1,6 @@
 #include <SDL.h>
 #include <iostream>
 #include <complex>
-#include <cmath>
-#include <string>
-#include <thread>
-#include <vector>
-#include <atomic>
 
 #include "color.h"
 #include "types.h"
@@ -23,11 +18,11 @@ static bool window_is_open = true;
 
 void shutdown(std::string str, uint8_t exit_code)
 {
-	std::cout << "Error: " << str.c_str() << std::endl;
+    render_destroy();
+	std::cout << "Shutdown message: " << str.c_str() << std::endl;
 	std::cout << "Shuting down." << std::endl;
-    exit(1);
+    exit(exit_code);
 }
-
 
 int main (int argc, char *argv[])
 {
@@ -62,12 +57,12 @@ int main (int argc, char *argv[])
     std::complex<double> ul = std::complex<double>(-2, 1);
     std::complex<double> lr = std::complex<double>(1, -1);
 
-    render_init(4);
-    std::thread render_thread(render_mandelbrot, ul, lr);
 
+    render_init(4);
+    render_mandelbrot(ul, lr);
+    //render_mandelbrot(std::complex<double>(0.3994999999988, 0.195303), scale_t{ 0.00000001, 0.00000001 });
 
     /* Draw mandelbrot to the renderer and renderer to the screen. */
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     bool once = true;
 	while (window_is_open)
 	{
@@ -85,11 +80,10 @@ int main (int argc, char *argv[])
 		{
 			if (event.type == SDL_QUIT) { window_is_open = false; }
 		}
-        SDL_Delay(5);
+        SDL_Delay(1);
 	}
-
-    render_thread.detach();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    shutdown("Successful exit.", 0);
     return 0;
 }

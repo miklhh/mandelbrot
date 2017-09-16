@@ -1,7 +1,5 @@
 TODO:
 
-
-1.	Make thread pool thread safe without deadlocking the damn thing.
-2.	I broke the render_create_bmp function. Plis fix.
-3.  Return all the resources before exiting the program through exit-button.
-4.  destroy_threadpool function needs a fixer-upper.
+1.  Lift the mandelbrot algorithm out of supersamling file, what is it even doing there?
+2.  Return all the resources before exiting the program through exit-button.
+3.  'destroy_threadpool' function needs a fixer-upper.

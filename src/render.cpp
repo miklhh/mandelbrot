@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <thread>
 #include <vector>
-#include <atomic>
 #include <iostream>
 
 #include "render.h"
@@ -9,17 +8,11 @@
 #include "types.h"
 #include "thread_pool.h"
 
-using std::vector;
-using std::thread;
-using std::complex;
-using std::atomic;
-
 /* Render data. */
 extern const int scr_width;
 extern const int scr_height;
-static vector<vector<rgb_t>> render_buffer;
+static std::vector<std::vector<rgb_t>> render_buffer;
 static mandelbrot_threadpool* thread_pool = NULL;
-static uint8_t threads;
 static bool rendering_complete;
 static scale_t scale;
 static offset_t offset;
@@ -50,13 +43,12 @@ void render_init(int n_threads)
     /* Initialize render buffer. */
     for (int y = 0; y < scr_height; y++)
     {
-        render_buffer.push_back(vector<rgb_t>());
+        render_buffer.push_back(std::vector<rgb_t>());
         for (int x = 0; x < scr_width; x++)
         {
             render_buffer.at(y).push_back(rgb_t{ 0, 0, 0, 0 });
         }
     }
-
     /* Initialize the thread pool. */
     thread_pool = mandelbrot_thread_pool_create(n_threads, render_segment);
     if (thread_pool == NULL)
@@ -68,13 +60,29 @@ void render_init(int n_threads)
         exit(1);
     }
     /* Initialze render data. */
-    threads = n_threads;
     rendering_complete = false;
     render_initialized = true;
 }
 
+void render_mandelbrot(
+    const std::complex<double> & point, 
+    const scale_t & scale)
+{
+    std::complex<double> upper_left { 
+        point.real() - scale.x, 
+        point.imag() + scale.y };
+    std::complex<double> lower_right { 
+        point.real() + scale.x, 
+        point.imag() - scale.y };
+    std::cout << "Upper left: " << upper_left << std::endl;
+    std::cout << "Lower right: " << lower_right << std::endl;
+    render_mandelbrot(upper_left, lower_right);
+}
+
 /* Static help function for getting the scale. */
-static scale_t get_scale(complex<double> upper_left, complex<double> lower_right)
+static scale_t get_scale(
+    std::complex<double> upper_left, 
+    std::complex<double> lower_right)
 {
     scale_t scale {
         (lower_right.real() - upper_left.real()) / scr_width,
@@ -84,17 +92,21 @@ static scale_t get_scale(complex<double> upper_left, complex<double> lower_right
 }
 
 /* Static help function for getting the offset. */
-static offset_t get_offset(complex<double> upper_left, complex<double> lower_right)
+static offset_t get_offset(
+    const std::complex<double> & upper_left,
+    const std::complex<double> & lower_right)
 {
     offset_t offset{
         upper_left.real() + (lower_right.real() - upper_left.real()) / 2,
         lower_right.imag() + (upper_left.imag() - lower_right.imag()) / 2
     };
-    offset.y = -offset.y;
     return offset;
 }
 
-void render_mandelbrot(complex<double> upper_left, complex<double> lower_right)
+/* Render the mandelbrot fractal. */
+void render_mandelbrot(
+    const std::complex<double> & upper_left, 
+    const std::complex<double> & lower_right)
 {
     /* Test if renderer is initialized. */
     if (!render_initialized)
@@ -170,4 +182,9 @@ int render_create_bmp(char* file_name)
     SDL_SaveBMP(surface, file_name);
     std::cout << "BMP created." << std::endl;
     return 0;
+}
+
+void render_destroy()
+{
+    mandelbrot_thread_pool_destroy(thread_pool);
 }

@@ -1,11 +1,13 @@
 /*
- * Threadpool for drawing segments of the mandelbrot set.
+ * Threadpool for drawing segments of the mandelbrot set. This thread pool is
+ * NOT a general-purpose thread pool, in that it can only handle callbacks of
+ * render_segment type.
  * 
  * Function explanations:
  *
  * (1) mandelbrot_threadpool* mandelbrot_thread_pool_create(
- *          int threads,
- *          std::function<void(segment_t)> render_segment);
+ *              int threads,
+ *              std::function<void(segment_t)> render_segment);
  *     --
  *     Function for creating a threadpool. Returns a pointer to the thred 
  *     pool on success. Each initialized threadpool should
@@ -28,7 +30,6 @@
  *     --
  */
 
-
 #ifndef MANDELBROT_THREAD_POOL_H
 #define MANDELBROT_THREAD_POOL_H
 
@@ -39,23 +40,12 @@
 
 #include "types.h"
 
-struct mandelbrot_threadpool
-{
-    int n_threads;
-    std::vector<std::thread> workers;
-    std::mutex worker_busy_mutex;
-    std::vector<bool> worker_busy;
-    std::mutex jobs_mutex;
-    std::queue<segment_t> jobs;
-    std::function<void(segment_t)> render_segment;
-};
-
-/* Functions */
+struct mandelbrot_threadpool;
 void mandelbrot_thread_pool_add_job(mandelbrot_threadpool* threadpool, segment_t segment);
 int mandelbrot_thread_pool_destroy(mandelbrot_threadpool* threadpool);
 int mandelbrot_thread_pool_get_active_workers(mandelbrot_threadpool* threadpool);
 mandelbrot_threadpool* mandelbrot_thread_pool_create(
-    int threads,
-    std::function<void(segment_t)> render_segment);
+        int threads,
+        std::function<void(segment_t)> render_segment);
 
 #endif

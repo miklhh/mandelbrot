@@ -2,7 +2,19 @@
 
 #include "thread_pool.h"
 
+/* The mandelbrot threadpool structure. */
+struct mandelbrot_threadpool 
+{
+    int n_threads;
+    std::vector<std::thread> workers;
+    std::mutex worker_busy_mutex;
+    std::vector<bool> worker_busy;
+    std::mutex jobs_mutex;
+    std::queue<segment_t> jobs;
+    std::function<void(segment_t)> render_segment;
+};
 
+/* Callback function for the thread pool threads. */
 static void mandelbrot_thread_pool_thread_callback(
     mandelbrot_threadpool* threadpool,
     int thread_index
@@ -50,7 +62,7 @@ static void mandelbrot_thread_pool_thread_callback(
     }
 }
 
-
+/* Internal function for launching a thread. */
 static void mandelbrot_thread_pool_launch(mandelbrot_threadpool* threadpool)
 {
     /* Try to find a free thread. */
@@ -104,8 +116,7 @@ mandelbrot_threadpool* mandelbrot_thread_pool_create(
     }
 }
 
-
-
+/* Add a job to the thread pool. */
 void mandelbrot_thread_pool_add_job(
     mandelbrot_threadpool* threadpool, 
     segment_t segment)
@@ -120,6 +131,8 @@ void mandelbrot_thread_pool_add_job(
 /* Destroy a threadpool. */
 int mandelbrot_thread_pool_destroy(mandelbrot_threadpool * threadpool)
 {
+    std::cout << "Killing threads." << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     for (int i = 0; i < threadpool->n_threads; i++)
     {
         threadpool->workers.at(i).~thread();
@@ -128,6 +141,7 @@ int mandelbrot_thread_pool_destroy(mandelbrot_threadpool * threadpool)
     return 0;
 }
 
+/* Returns the amount of active workers. */
 int mandelbrot_thread_pool_get_active_workers(mandelbrot_threadpool * threadpool)
 {
     std::lock_guard<std::mutex> lock_worker_busy(threadpool->worker_busy_mutex);

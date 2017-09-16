@@ -7,19 +7,21 @@
 
 #include <stdint.h>
 
-/* Scaling and offset. */
+/* Scale data type. */
 struct scale_t
 {
     double x;
     double y;
 };
 
+/* Offset data type. */
 struct offset_t
 {
     double x;
     double y;
 };
 
+/* Red-Green-Blue data type. */
 struct rgb_t
 {
     uint32_t red : 8;
@@ -28,6 +30,7 @@ struct rgb_t
     uint32_t alpha : 8;
 };
 
+/* Hue-Saturation-Light data type. */
 struct hsl_t
 {
     double hue;         // 'Hue' mesuared in radians [0, 2*pi].
@@ -35,6 +38,7 @@ struct hsl_t
     double light;       // 'Light' [0, 1].
 };
 
+/* Pixel segment sata-type. */
 struct segment_t
 {
     int x_bgn;
