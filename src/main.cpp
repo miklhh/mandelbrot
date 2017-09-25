@@ -19,8 +19,8 @@ static bool window_is_open = true;
 void shutdown(std::string str, uint8_t exit_code)
 {
     render_destroy();
-	std::cout << "Shutdown message: " << str.c_str() << std::endl;
-	std::cout << "Returning to system with exit code: " << int(exit_code) << std::endl;
+    std::cout << "Shutdown message: " << str.c_str() << std::endl;
+    std::cout << "Returning to system with exit code: " << int(exit_code) << std::endl;
     exit(exit_code);
 }
 
@@ -30,22 +30,22 @@ int main (int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-	/* Init SDL. */
-	if (SDL_Init(SDL_INIT_VIDEO) != 0) 
-	{
-		std::cout << "Could not init SDL." << std::endl;
-		return -1;
-	}
+    /* Init SDL. */
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) 
+    {
+        std::cout << "Could not init SDL." << std::endl;
+        return -1;
+    }
 
-	SDL_Event event;
-	if (SDL_CreateWindowAndRenderer(scr_width, scr_height, 0, &window, &renderer) != 0)
-	{
-		std::cerr << "Could not create window and renderer." << std::endl;
-		return -1;
-	}
+    SDL_Event event;
+    if (SDL_CreateWindowAndRenderer(scr_width, scr_height, 0, &window, &renderer) != 0)
+    {
+        std::cerr << "Could not create window and renderer." << std::endl;
+        return -1;
+    }
 
     /* Initialize the mandelbrot renderer. */
-    
+
     //complex<double> ul = std::complex<double>(-0.74510, 0.11868);
     //complex<double> lr = std::complex<double>(-0.74490, 0.11848);
 
@@ -68,8 +68,8 @@ int main (int argc, char *argv[])
 
     /* Draw mandelbrot to the renderer and renderer to the screen. */
     bool once = true;
-	while (window_is_open)
-	{
+    while (window_is_open)
+    {
         if (render_test_complete() && once)
         {
             render_create_bmp("hello.bmp");
@@ -79,13 +79,13 @@ int main (int argc, char *argv[])
         render_draw_to_SDL_Renderer(renderer);
         SDL_RenderPresent(renderer);
 
-		/* Handle events. */
-		while (SDL_PollEvent(&event))
-		{
-			if (event.type == SDL_QUIT) { window_is_open = false; }
-		}
+        /* Handle events. */
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT) { window_is_open = false; }
+        }
         SDL_Delay(1);
-	}
+    }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     shutdown("Successful exit.", 0);
