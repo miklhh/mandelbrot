@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <iostream>
 #include <complex>
 
@@ -9,7 +9,7 @@
 
 extern const int scr_width = 1920;
 extern const int scr_height = 1080;
-uint32_t max_iterations = 5000;
+unsigned int max_iterations = 5000;
 
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
@@ -20,12 +20,16 @@ void shutdown(std::string str, uint8_t exit_code)
 {
     render_destroy();
 	std::cout << "Shutdown message: " << str.c_str() << std::endl;
-	std::cout << "Shuting down." << std::endl;
+	std::cout << "Returning to system with exit code: " << int(exit_code) << std::endl;
     exit(exit_code);
 }
 
 int main (int argc, char *argv[])
 {
+    /* Get rid of the 'argv', 'argc' warnings. */
+    (void)argc;
+    (void)argv;
+
 	/* Init SDL. */
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) 
 	{

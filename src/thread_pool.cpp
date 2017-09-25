@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 
 #include "thread_pool.h"
 
@@ -96,7 +97,7 @@ mandelbrot_threadpool* mandelbrot_thread_pool_create(
 {
     /* Allocate the threadpool and set it up. */
     mandelbrot_threadpool* threadpool = new mandelbrot_threadpool;
-    if (!threadpool == NULL) 
+    if (threadpool != NULL) 
     {
         /* Create the proper amount of thread objects. */
         for (int i = 0; i < threads; i++)

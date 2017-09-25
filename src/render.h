@@ -46,7 +46,7 @@
 #ifndef _MANDELBROT_RENDER_H
 #define _MANDELBROT_RENDER_H
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <complex>
 
 #include "types.h"
@@ -60,7 +60,7 @@ void render_mandelbrot(
     const std::complex<double> & lower_right);
 void render_draw_to_SDL_Renderer(SDL_Renderer* renderer);
 bool render_test_complete();
-int  render_create_bmp(char* file_name);
+int  render_create_bmp(const char* file_name);
 void render_destroy();
 
 

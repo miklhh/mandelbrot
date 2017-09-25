@@ -24,7 +24,7 @@
 
 /* Get the propriete color for a pixel. */
 rgb_t get_color(
-    int iterations, 
+    unsigned int iterations, 
     const std::complex<double> & zn, 
     const std::complex<double> & c);
 

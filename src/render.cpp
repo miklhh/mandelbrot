@@ -165,7 +165,7 @@ static void set_pixel_on_surface(SDL_Surface* surface, int x, int y, rgb_t pixel
 }
 
 /* Function for creating a bmp and storing it in execution directory. */
-int render_create_bmp(char* file_name)
+int render_create_bmp(const char* file_name)
 {
     /* Create a surface and unlock the pixels*/
     std::cout << "Creating BMP." << std::endl;

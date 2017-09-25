@@ -50,8 +50,8 @@ rgb_t get_px_1x_ss(int px_x, int px_y)
     double y = double((px_y - scr_height / 2) * scale.y + offset.y);
     complex<double> c(x, y);
     complex<double> z(0, 0);
-    uint32_t iterations = 0;
-    for (iterations; iterations < max_iterations; iterations++)
+    unsigned int iterations;
+    for (iterations = 0; iterations < max_iterations; iterations++)
     {
         z = z * z + c;
         if (test_escape(z, 2.0)) { break; }
@@ -71,8 +71,8 @@ rgb_t get_px_4x_ss(int px_x, int px_y)
     /* 'Pixel': 1. */
     complex<double> c1(x - scale.x / 4, y - scale.y / 4);
     complex<double> z1(0, 0);
-    uint32_t iterations1 = 0;
-    for (iterations1; iterations1 < max_iterations; iterations1++)
+    unsigned int iterations1;
+    for (iterations1 = 0; iterations1 < max_iterations; iterations1++)
     {
         z1 = z1 * z1 + c1;
         if (test_escape(z1, 2.0)) { break; }
@@ -81,8 +81,8 @@ rgb_t get_px_4x_ss(int px_x, int px_y)
     /* 'Pixel': 2. */
     complex<double> c2(c.real() - scale.x / 4, c.imag() + scale.y / 4);
     complex<double> z2(0, 0);
-    uint32_t iterations2 = 0;
-    for (iterations2; iterations2 < max_iterations; iterations2++)
+    unsigned int iterations2;
+    for (iterations2 = 0; iterations2 < max_iterations; iterations2++)
     {
         z2 = z2 * z2 + c2;
         if (test_escape(z2, 2.0)) { break; }
@@ -91,8 +91,8 @@ rgb_t get_px_4x_ss(int px_x, int px_y)
     /* 'Pixel': 3. */
     complex<double> c3(c.real() + scale.x / 4, c.imag() - scale.y / 4);
     complex<double> z3(0, 0);
-    uint32_t iterations3 = 0;
-    for (iterations3; iterations3 < max_iterations; iterations3++)
+    unsigned int iterations3;
+    for (iterations3 = 0; iterations3 < max_iterations; iterations3++)
     {
         z3 = z3 * z3 + c3;
         if (test_escape(z3, 2.0)) { break; }
@@ -101,8 +101,8 @@ rgb_t get_px_4x_ss(int px_x, int px_y)
     /* 'Pixel': 4. */
     complex<double> c4(c.real() + scale.x / 4, c.imag() + scale.y / 4);
     complex<double> z4(0, 0);
-    uint32_t iterations4 = 0;
-    for (iterations4; iterations4 < max_iterations; iterations4++)
+    unsigned int iterations4;
+    for (iterations4 = 0; iterations4 < max_iterations; iterations4++)
     {
         z4 = z4 * z4 + c4;
         if (test_escape(z4, 2.0)) { break; }

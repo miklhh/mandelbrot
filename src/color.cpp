@@ -75,14 +75,14 @@ static double get_convergence_value(
 
 /* Function sets the color to draw. */
 rgb_t get_color(
-    int iterations, 
+    unsigned int iterations, 
     const std::complex<double> & zn, 
     const std::complex<double> & c)
 {
     rgb_t color{ 0, 0, 0, 0 };
 
     /* If it converges. */
-    extern uint32_t max_iterations;
+    extern unsigned int max_iterations;
     if (iterations == max_iterations)
     {
         return color;

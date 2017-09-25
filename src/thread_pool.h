@@ -37,6 +37,7 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <functional>
 
 #include "types.h"
 
